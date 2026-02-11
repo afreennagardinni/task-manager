@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task Manager</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#eef1f5;
+}
+
+.container{
+  max-width:420px;
+  margin:auto;
+  padding:20px;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:5px;
+}
+
+.counter{
+  text-align:center;
+  color:gray;
+  margin-bottom:15px;
+}
+
+.inputBox{
+  display:flex;
+  gap:8px;
+}
+
+input{
+  flex:1;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:8px;
+}
+
+.addBtn{
+  background:#28a745;
+  color:white;
+  border:none;
+  padding:12px 16px;
+  border-radius:8px;
+}
+
+ul{
+  list-style:none;
+  padding:0;
+}
+
+li{
+  background:white;
+  margin-top:12px;
+  padding:14px;
+  border-radius:12px;
+  box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+
+.taskTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.taskText.done{
+  text-decoration:line-through;
+  color:gray;
+}
+
+.time{
+  font-size:12px;
+  color:gray;
+  margin-top:4px;
+}
+
+.btns button{
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+  color:white;
+  margin-left:6px;
+}
+
+.edit{ background:#3498db; }
+.delete{ background:#e74c3c; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>My Tasks</h1>
+<div class="counter" id="count"></div>
+
+<div class="inputBox">
+<input id="taskInput" placeholder="Enter task">
+<button class="addBtn" onclick="addTask()">Add</button>
+</div>
+
+<ul id="taskList"></ul>
+</div>
+
+<script>
+localStorage.clear()
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+showTasks();
+
+function addTask(){
+  let input=document.getElementById("taskInput");
+  let text=input.value.trim();
+  if(text==="") return;
+
+  let time=new Date().toLocaleString();
+
+  tasks.push({text:text,time:time,done:false});
+  localStorage.setItem("tasks",JSON.stringify(tasks));
+
+  input.value="";
+  showTasks();
+}
+
+function showTasks(){
+  let list=document.getElementById("taskList");
+  list.innerHTML="";
+
+  document.getElementById("count").innerText=
+  "Total Tasks: "+tasks.length;
+
+  tasks.forEach((task,index)=>{
+
+    let li=document.createElement("li");
+
+    let top=document.createElement("div");
+    top.className="taskTop";
+
+    let span=document.createElement("span");
+    span.innerText=task.text;
+    span.className="taskText";
+    if(task.done) span.classList.add("done");
+
+    span.onclick=()=>{
+      task.done=!task.done;
+      localStorage.setItem("tasks",JSON.stringify(tasks));
+      showTasks();
+    };
+
+    let btns=document.createElement("div");
+
+    let edit=document.createElement("button");
+    edit.innerText="Edit";
+    edit.className="edit";
+    edit.onclick=()=>{
+      let newText=prompt("Edit task",task.text);
+      if(newText){
+        task.text=newText;
+        localStorage.setItem("tasks",JSON.stringify(tasks));
+        showTasks();
+      }
+    };
+
+    let del=document.createElement("button");
+    del.innerText="Delete";
+    del.className="delete";
+    del.onclick=()=>{
+      tasks.splice(index,1);
+      localStorage.setItem("tasks",JSON.stringify(tasks));
+      showTasks();
+    };
+
+    btns.appendChild(edit);
+    btns.appendChild(del);
+
+    top.appendChild(span);
+    top.appendChild(btns);
+
+    let time=document.createElement("div");
+    time.className="time";
+    time.innerText="Added: "+task.time;
+
+    li.appendChild(top);
+    li.appendChild(time);
+    list.appendChild(li);
+  });
+}
+
+document.getElementById("taskInput")
+.addEventListener("keypress",function(e){
+  if(e.key==="Enter") addTask();
+});
+</script>
+
+</body>
+</html>
